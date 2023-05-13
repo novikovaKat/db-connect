@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">lab5</string>
+    <string name="firstNameHint">Enter your first name</string>
+    <string name="lastNameHint">Enter your last name</string>
+    <string name="emailHint">Enter your email</string>
+    <string name="idHint">Enter your ID</string>
+    <string name="addressHint">Enter your address</string>
+    <string name="idLabel">ID</string>
+    <string name="firstNameLabel">First name</string>
+    <string name="lastNameLabel">Last name</string>
+    <string name="emailLabel">Email</string>
+    <string name="addressLabel">Address</string>
+    <string name="btnAdd">Add</string>
+    <string name="btnRead">Read</string>
+    <string name="btnClear">Clear</string>
+    <string name="btnUpdate">Update</string>
+    <string name="btnDelete">Delete</string>
+</resources>
