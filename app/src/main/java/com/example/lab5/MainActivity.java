@@ -1,17 +1,13 @@
 package com.example.lab5;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
-import android.content.ContentValues;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 
 public class MainActivity extends Activity {
     final String LOG_TAG = "myLogs";
@@ -22,11 +18,9 @@ public class MainActivity extends Activity {
     public Button btnClear;
     public Button btnUpdate;
     public Button btnDelete;
-    public EditText editID;
-    public EditText editFirstName;
-    public EditText editLastName;
-    public EditText editEmail;
-    public EditText editAddress;
+    public Button btnSort;
+    public EditText displayTextView;
+    public RadioGroup radioGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,93 +32,80 @@ public class MainActivity extends Activity {
         btnClear = findViewById(R.id.btnClear);
         btnUpdate = findViewById(R.id.btnUpdate);
         btnDelete = findViewById(R.id.btnDelete);
-        editID = findViewById(R.id.editID);
-        editFirstName = findViewById(R.id.editFirstName);
-        editLastName = findViewById(R.id.editLastName);
-        editEmail = findViewById(R.id.editEmail);
-        editAddress = findViewById(R.id.editAddress);
+        btnSort = findViewById(R.id.btnSort);
+        radioGroup = findViewById(R.id.radioGroup);
 
+        displayTextView = findViewById(R.id.dbInfo);
+        displayTextView.setText("");
 
-        btnAdd.setOnClickListener(view -> insertAccount());
-        btnRead.setOnClickListener(view -> displayInfo());
+        btnAdd.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, AddActivity.class);
+            startActivity(intent);
+            displayTextView.setText("");
+        });
+        btnUpdate.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, UpdateActivity.class);
+            startActivity(intent);
+            displayTextView.setText("");
+        });
+        btnDelete.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, DeleteActivity.class);
+            startActivity(intent);
+            displayTextView.setText("");
+        });
+
+        btnRead.setOnClickListener(view -> readInfo());
         btnClear.setOnClickListener(view -> clearInfo());
-        btnUpdate.setOnClickListener(view -> updateAccount());
-        btnDelete.setOnClickListener(view -> deleteAccount());
+        btnSort.setOnClickListener(view -> sortInfo());
 
         dbHelper = new DBHelper(this);
     }
 
-    private void deleteAccount() {
-        String id_s = editID.getText().toString();
+    private void sortInfo() {
+        int checkedRadioButtonId = radioGroup.getCheckedRadioButtonId();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = null;
+        String[] projection = {
+                Contract.GuestEntry._ID,
+                Contract.GuestEntry.COLUMN_FIRST_NAME,
+                Contract.GuestEntry.COLUMN_LAST_NAME,
+                Contract.GuestEntry.COLUMN_EMAIL,
+                Contract.GuestEntry.COLUMN_ADDRESS};
 
-        if(!id_s.isEmpty()){
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            db.delete(Contract.GuestEntry.TABLE_NAME,"_id = ?",  new String[] {id_s});
-            db.close();
+        switch (checkedRadioButtonId){
+            case R.id.radioFirstName:
+                cursor = db.query(
+                        Contract.GuestEntry.TABLE_NAME,   // таблиця
+                        projection,            // стовпці
+                        null,                  // стовпці для умови WHERE
+                        null,                  // значення для умови WHERE
+                        null,                  // Don't group the rows
+                        null,                  // Don't filter by row groups
+                        Contract.GuestEntry.COLUMN_FIRST_NAME + " ASC");                   // порядок сортування
+                break;
+            case R.id.radioLastName:
+                cursor = db.query(
+                        Contract.GuestEntry.TABLE_NAME,   // таблиця
+                        projection,            // стовпці
+                        null,                  // стовпці для умови WHERE
+                        null,                  // значення для умови WHERE
+                        null,                  // Don't group the rows
+                        null,                  // Don't filter by row groups
+                        Contract.GuestEntry.COLUMN_LAST_NAME + " ASC");                   // порядок сортування
+                break;
+            case R.id.radioEmail:
+                cursor = db.query(
+                        Contract.GuestEntry.TABLE_NAME,   // таблиця
+                        projection,            // стовпці
+                        null,                  // стовпці для умови WHERE
+                        null,                  // значення для умови WHERE
+                        null,                  // Don't group the rows
+                        null,                  // Don't filter by row groups
+                        "SUBSTR(" + Contract.GuestEntry.COLUMN_EMAIL + ", 1, 1) ASC");                   // порядок сортування
+                break;
         }
-        else{
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-            builder1.setMessage("Error: ID is empty");
-            builder1.setCancelable(true);
-
-            builder1.setPositiveButton(
-                    "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
-        }
-    }
-
-    private void updateAccount() {
-        String id_s = editID.getText().toString();
-
-        if(!id_s.isEmpty()){
-            String firstName = String.valueOf(editFirstName.getText());
-            String lastName = String.valueOf(editLastName.getText());
-            String email = String.valueOf(editEmail.getText());
-            String address = String.valueOf(editAddress.getText());
-
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            // Створюємо об'єкт ContentValues, де імена стовпців - ключі,
-            // а інформация про акаунт - значення
-            ContentValues values = new ContentValues();
-            if (!firstName.isEmpty()){
-                values.put(Contract.GuestEntry.COLUMN_FIRST_NAME, firstName);
-            }
-            if(!lastName.isEmpty()){
-                values.put(Contract.GuestEntry.COLUMN_LAST_NAME, lastName);
-            }
-            if(!email.isEmpty()){
-                values.put(Contract.GuestEntry.COLUMN_EMAIL, email);
-            }
-            if(!address.isEmpty()){
-                values.put(Contract.GuestEntry.COLUMN_ADDRESS, address);
-            }
-
-            long newRowId = db.update(Contract.GuestEntry.TABLE_NAME, values, "_id = ?",  new String[] {id_s});
-            db.close();
-        }
-        else{
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-            builder1.setMessage("Error: ID is empty");
-            builder1.setCancelable(true);
-
-            builder1.setPositiveButton(
-                    "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
-        }
+        displayInfo(cursor);
+        db.close();
     }
 
     private void clearInfo() {
@@ -132,27 +113,7 @@ public class MainActivity extends Activity {
         db.delete(Contract.GuestEntry.TABLE_NAME, null, null);
         db.close();
     }
-
-    private void insertAccount() {
-        String firstName = String.valueOf(editFirstName.getText());
-        String lastName = String.valueOf(editLastName.getText());
-        String email = String.valueOf(editEmail.getText());
-        String address = String.valueOf(editAddress.getText());
-
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        // Створюємо об'єкт ContentValues, де імена стовпців - ключі,
-        // а інформация про акаунт - значення
-        ContentValues values = new ContentValues();
-        values.put(Contract.GuestEntry.COLUMN_FIRST_NAME, firstName);
-        values.put(Contract.GuestEntry.COLUMN_LAST_NAME, lastName);
-        values.put(Contract.GuestEntry.COLUMN_EMAIL, email);
-        values.put(Contract.GuestEntry.COLUMN_ADDRESS, address);
-
-        long newRowId = db.insert(Contract.GuestEntry.TABLE_NAME, null, values);
-        db.close();
-    }
-
-    public void displayInfo(){
+    public void readInfo(){
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         String[] projection = {
@@ -172,9 +133,11 @@ public class MainActivity extends Activity {
                 null,                  // Don't filter by row groups
                 null);                   // порядок сортування
 
+        displayInfo(cursor);
+        db.close();
+    }
 
-        EditText displayTextView = (EditText) findViewById(R.id.dbInfo);
-
+    public void displayInfo(Cursor cursor){
         try {
             String label = "Таблиця містить " + cursor.getCount() + " акаунтів.\n\n";
             displayTextView.setText(label);
@@ -210,8 +173,6 @@ public class MainActivity extends Activity {
         } finally {
             // завжди закриваємо курсор
             cursor.close();
-            db.close();
         }
     }
-
 }
