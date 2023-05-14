@@ -3,10 +3,13 @@ package com.example.lab5;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -19,6 +22,9 @@ public class UpdateActivity extends Activity {
     public EditText editEmail;
     public EditText editAddress;
     public Button btnConfirm;
+    public Button btnLoad;
+    public ImageView imageView;
+    static final int GALLERY_REQUEST = 1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,8 +37,34 @@ public class UpdateActivity extends Activity {
         editEmail = findViewById(R.id.editEmail);
         editAddress = findViewById(R.id.editAddress);
         btnConfirm = findViewById(R.id.btnConfirmUpdate);
+        btnLoad = findViewById(R.id.btnLoad);
+        imageView = findViewById(R.id.imageView);
 
         btnConfirm.setOnClickListener(view -> confirmUpdate());
+    }
+
+    private void loadPhoto() {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, GALLERY_REQUEST);
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+
+        switch(requestCode) {
+            case GALLERY_REQUEST:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    // remove previous image uri cache
+                    imageView.setImageURI(null);
+                    // set image view image from uri
+                    imageView.setImageURI(selectedImage);
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + requestCode);
+        }
     }
 
     private void confirmUpdate() {
