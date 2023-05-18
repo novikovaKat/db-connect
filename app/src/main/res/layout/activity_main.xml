@@ -21,7 +21,7 @@
         android:id="@+id/btnRead"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="160dp"
+        android:layout_marginStart="48dp"
         android:layout_marginTop="108dp"
         android:text="@string/btnRead"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,7 +31,7 @@
         android:id="@+id/btnClear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
+        android:layout_marginStart="272dp"
         android:layout_marginTop="108dp"
         android:text="@string/btnClear"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,6 +42,7 @@
         android:layout_width="0dp"
         android:layout_height="350dp"
         android:layout_marginStart="15dp"
+        android:layout_marginTop="43dp"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="15dp"
         android:background="#2196F3"
@@ -55,7 +56,8 @@
         android:text="@string/dbInfo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
 
     <Button
         android:id="@+id/btnUpdate"
@@ -81,9 +83,19 @@
         android:id="@+id/btnSort"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="272dp"
-        android:layout_marginTop="108dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="184dp"
         android:text="@string/btnSort"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnReadOne"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="148dp"
+        android:layout_marginTop="108dp"
+        android:text="@string/btnReadOne"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -122,11 +134,11 @@
         android:id="@+id/orderLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="91dp"
-        android:layout_marginBottom="119dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="20dp"
         android:text="@string/orderlabel"
-        app:layout_constraintBottom_toTopOf="@+id/dbInfo"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnSort" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -37,6 +37,4 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DROP_TABLE);
         onCreate(db);
     }
-
-
 }

@@ -13,14 +13,16 @@ public class MainActivity extends Activity {
     final String LOG_TAG = "myLogs";
     DBHelper dbHelper;
 
-    public Button btnAdd;
-    public Button btnRead;
-    public Button btnClear;
-    public Button btnUpdate;
-    public Button btnDelete;
-    public Button btnSort;
-    public EditText displayTextView;
-    public RadioGroup radioGroup;
+    private Button btnAdd;
+    private Button btnRead;
+    private Button btnClear;
+    private Button btnUpdate;
+    private Button btnDelete;
+    private Button btnSort;
+    private EditText displayTextView;
+    private RadioGroup radioGroup;
+    private Button btnReadOne;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +36,7 @@ public class MainActivity extends Activity {
         btnDelete = findViewById(R.id.btnDelete);
         btnSort = findViewById(R.id.btnSort);
         radioGroup = findViewById(R.id.radioGroup);
+        btnReadOne = findViewById(R.id.btnReadOne);
 
         displayTextView = findViewById(R.id.dbInfo);
         displayTextView.setText("");
@@ -50,6 +53,11 @@ public class MainActivity extends Activity {
         });
         btnDelete.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, DeleteActivity.class);
+            startActivity(intent);
+            displayTextView.setText("");
+        });
+        btnReadOne.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, ReadOneActivity.class);
             startActivity(intent);
             displayTextView.setText("");
         });

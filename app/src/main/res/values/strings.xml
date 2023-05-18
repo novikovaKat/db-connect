@@ -24,4 +24,5 @@
     <string name="radioSurName">Last Name</string>
     <string name="radioEmail">Email</string>
     <string name="btnLoad">Load photo</string>
+    <string name="btnReadOne">Read One</string>
 </resources>
