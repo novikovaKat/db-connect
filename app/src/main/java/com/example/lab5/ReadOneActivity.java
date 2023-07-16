@@ -3,6 +3,7 @@ package com.example.lab5;
 import android.app.Activity;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -47,7 +48,8 @@ public class ReadOneActivity extends Activity {
                 Contract.GuestEntry.COLUMN_FIRST_NAME,
                 Contract.GuestEntry.COLUMN_LAST_NAME,
                 Contract.GuestEntry.COLUMN_EMAIL,
-                Contract.GuestEntry.COLUMN_ADDRESS};
+                Contract.GuestEntry.COLUMN_ADDRESS,
+                Contract.GuestEntry.COLUMN_IMAGE};
 
         String selection = Contract.GuestEntry._ID + "=?";
         String[] selectionArgs = {id};
@@ -64,12 +66,18 @@ public class ReadOneActivity extends Activity {
         int lastNameColumnIndex = cursor.getColumnIndex(Contract.GuestEntry.COLUMN_LAST_NAME);
         int emailColumnIndex = cursor.getColumnIndex(Contract.GuestEntry.COLUMN_EMAIL);
         int addressColumnIndex = cursor.getColumnIndex(Contract.GuestEntry.COLUMN_ADDRESS);
+        int imageColumnIndex = cursor.getColumnIndex(Contract.GuestEntry.COLUMN_IMAGE);
 
         if (cursor.moveToNext()) {
             firstNameView.setText(cursor.getString(firstNameColumnIndex));
             lastNameView.setText(cursor.getString(lastNameColumnIndex));
             emailView.setText(cursor.getString(emailColumnIndex));
             addressView.setText(cursor.getString(addressColumnIndex));
+            String imageBase64 = cursor.getString(imageColumnIndex);
+            if(imageBase64 != null){
+                Bitmap convertedToImage = MainActivity.convertToBitmap(imageBase64);
+                imageView.setImageBitmap(convertedToImage);
+            }
         }
         cursor.close();
         db.close();

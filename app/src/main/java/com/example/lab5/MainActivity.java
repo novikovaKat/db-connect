@@ -4,10 +4,15 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+
+import java.io.ByteArrayOutputStream;
 
 public class MainActivity extends Activity {
     final String LOG_TAG = "myLogs";
@@ -63,7 +68,10 @@ public class MainActivity extends Activity {
         });
 
         btnRead.setOnClickListener(view -> readInfo());
-        btnClear.setOnClickListener(view -> clearInfo());
+        btnClear.setOnClickListener(view -> {
+            clearInfo();
+            displayTextView.setText(R.string.onClear);
+        });
         btnSort.setOnClickListener(view -> sortInfo());
 
         dbHelper = new DBHelper(this);
@@ -182,5 +190,15 @@ public class MainActivity extends Activity {
             // завжди закриваємо курсор
             cursor.close();
         }
+    }
+    public static String convertToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,100,os);
+        byte[] byteArray = os.toByteArray();
+        return Base64.encodeToString(byteArray, 0);
+    }
+    public static Bitmap convertToBitmap(String base64String) {
+        byte[] decodedString = Base64.decode(base64String, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
 }

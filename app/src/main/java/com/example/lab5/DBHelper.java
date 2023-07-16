@@ -25,7 +25,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 + Contract.GuestEntry.COLUMN_FIRST_NAME + " TEXT NOT NULL, "
                 + Contract.GuestEntry.COLUMN_LAST_NAME + " TEXT NOT NULL, "
                 + Contract.GuestEntry.COLUMN_EMAIL + " TEXT NOT NULL, "
-                + Contract.GuestEntry.COLUMN_ADDRESS + " TEXT NOT NULL);";
+                + Contract.GuestEntry.COLUMN_ADDRESS + " TEXT NOT NULL, "
+                + Contract.GuestEntry.COLUMN_IMAGE + " TEXT);";
 
         db.execSQL(SQL_CREATE_GUESTS_TABLE);
     }
@@ -33,8 +34,16 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.w("SQLite", "Оновлення з версії " + oldVersion + " на версію " + newVersion);
-        String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + Contract.GuestEntry.TABLE_NAME;
+        String SQL_DROP_TABLE = "DROP TABLE " + Contract.GuestEntry.TABLE_NAME + ";";
         db.execSQL(SQL_DROP_TABLE);
-        onCreate(db);
+        String SQL_CREATE_GUESTS_TABLE = "CREATE TABLE " + Contract.GuestEntry.TABLE_NAME + " ("
+                + Contract.GuestEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + Contract.GuestEntry.COLUMN_FIRST_NAME + " TEXT NOT NULL, "
+                + Contract.GuestEntry.COLUMN_LAST_NAME + " TEXT NOT NULL, "
+                + Contract.GuestEntry.COLUMN_EMAIL + " TEXT NOT NULL, "
+                + Contract.GuestEntry.COLUMN_ADDRESS + " TEXT NOT NULL, "
+                + Contract.GuestEntry.COLUMN_IMAGE + " TEXT);";
+
+        db.execSQL(SQL_CREATE_GUESTS_TABLE);
     }
 }

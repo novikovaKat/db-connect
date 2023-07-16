@@ -25,6 +25,7 @@ public class AddActivity extends Activity {
     public Button btnConfirm;
     public Button btnLoad;
     public ImageView imageView;
+    private String convertedImage;
     static final int GALLERY_REQUEST = 1;
 
     @Override
@@ -52,15 +53,21 @@ public class AddActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+        Bitmap bitmap = null;
 
         switch(requestCode) {
             case GALLERY_REQUEST:
                 if(resultCode == RESULT_OK){
                     Uri selectedImage = imageReturnedIntent.getData();
-                    // remove previous image uri cache
-                    imageView.setImageURI(null);
-                    // set image view image from uri
-                    imageView.setImageURI(selectedImage);
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    imageView.setImageBitmap(bitmap);
+                    if(bitmap!=null){
+                        convertedImage = MainActivity.convertToBase64(bitmap);
+                    }
                 }
                 break;
             default:
@@ -73,25 +80,59 @@ public class AddActivity extends Activity {
         String email = String.valueOf(editEmail.getText());
         String address = String.valueOf(editAddress.getText());
 
-        DBHelper dbHelper = new DBHelper(this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        // Створюємо об'єкт ContentValues, де імена стовпців - ключі,
-        // а інформация про акаунт - значення
-        ContentValues values = new ContentValues();
-        values.put(Contract.GuestEntry.COLUMN_FIRST_NAME, firstName);
-        values.put(Contract.GuestEntry.COLUMN_LAST_NAME, lastName);
-        values.put(Contract.GuestEntry.COLUMN_EMAIL, email);
-        values.put(Contract.GuestEntry.COLUMN_ADDRESS, address);
+        if(checkValues(firstName, lastName, email, address)){
+            DBHelper dbHelper = new DBHelper(this);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            // Створюємо об'єкт ContentValues, де імена стовпців - ключі,
+            // а інформация про акаунт - значення
+            ContentValues values = new ContentValues();
+            values.put(Contract.GuestEntry.COLUMN_FIRST_NAME, firstName);
+            values.put(Contract.GuestEntry.COLUMN_LAST_NAME, lastName);
+            values.put(Contract.GuestEntry.COLUMN_EMAIL, email);
+            values.put(Contract.GuestEntry.COLUMN_ADDRESS, address);
+            values.put(Contract.GuestEntry.COLUMN_IMAGE, convertedImage);
 
-        long newRowId = db.insert(Contract.GuestEntry.TABLE_NAME, null, values);
-        // Виводимо повідомлення про результат
-        if (newRowId == -1) {
-            // Якщо ID  -1, значить виникла помилка
-            Toast.makeText(this, "Помилка при додаванні акаунту", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Акаунт додано успішно", Toast.LENGTH_SHORT).show();
+            long newRowId = db.insert(Contract.GuestEntry.TABLE_NAME, null, values);
+            // Виводимо повідомлення про результат
+            if (newRowId == -1) {
+                // Якщо ID  -1, значить виникла помилка
+                Toast.makeText(this, "Error adding account", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Account added successfully", Toast.LENGTH_SHORT).show();
+            }
+            db.close();
+            finish();
         }
-        db.close();
-        finish();
+    }
+    public boolean checkValues(String first_name, String last_name, String email, String address){
+        if (first_name.isBlank()){
+            Toast.makeText(this, "Error: empty name value", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        for (Character c: first_name.toCharArray()) {
+            if(Character.isDigit(c)){
+                Toast.makeText(this, "Error: name contains digits", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        if (last_name.isBlank()){
+            Toast.makeText(this, "Error: empty last name value", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        for (Character c: last_name.toCharArray()) {
+            if(Character.isDigit(c)){
+                Toast.makeText(this, "Error: last name contains digits", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        if (email.isBlank()){
+            Toast.makeText(this, "Error: empty email value", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(address.isBlank()){
+            Toast.makeText(this, "Error: empty address value", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

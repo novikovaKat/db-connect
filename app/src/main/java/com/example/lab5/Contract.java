@@ -13,6 +13,7 @@ public final class Contract {
         public final static String COLUMN_LAST_NAME = "last_name";
         public final static String COLUMN_EMAIL = "email";
         public final static String COLUMN_ADDRESS = "address";
+        public static final String COLUMN_IMAGE = "image";
 
     }
 }

@@ -5,8 +5,11 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,15 +18,18 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
+import java.io.IOException;
+
 public class UpdateActivity extends Activity {
-    public EditText editID;
-    public EditText editFirstName;
-    public EditText editLastName;
-    public EditText editEmail;
-    public EditText editAddress;
-    public Button btnConfirm;
-    public Button btnLoad;
-    public ImageView imageView;
+    private EditText editID;
+    private EditText editFirstName;
+    private EditText editLastName;
+    private EditText editEmail;
+    private EditText editAddress;
+    private Button btnConfirm;
+    private Button btnLoad;
+    private ImageView imageView;
+    private String convertedImage;
     static final int GALLERY_REQUEST = 1;
 
     @Override
@@ -41,6 +47,7 @@ public class UpdateActivity extends Activity {
         imageView = findViewById(R.id.imageView);
 
         btnConfirm.setOnClickListener(view -> confirmUpdate());
+        btnLoad.setOnClickListener(view -> loadPhoto());
     }
 
     private void loadPhoto() {
@@ -51,15 +58,21 @@ public class UpdateActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+        Bitmap bitmap = null;
 
         switch(requestCode) {
             case GALLERY_REQUEST:
                 if(resultCode == RESULT_OK){
                     Uri selectedImage = imageReturnedIntent.getData();
-                    // remove previous image uri cache
-                    imageView.setImageURI(null);
-                    // set image view image from uri
-                    imageView.setImageURI(selectedImage);
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    imageView.setImageBitmap(bitmap);
+                    if(bitmap!=null){
+                        convertedImage = MainActivity.convertToBase64(bitmap);
+                    }
                 }
                 break;
             default:
@@ -68,57 +81,65 @@ public class UpdateActivity extends Activity {
     }
 
     private void confirmUpdate() {
-        String id_s = editID.getText().toString();
+        String id_s = String.valueOf(editID.getText());
 
-        if(!id_s.isEmpty()){
+        if(!id_s.isEmpty() && TextUtils.isDigitsOnly(id_s)){
             String firstName = String.valueOf(editFirstName.getText());
             String lastName = String.valueOf(editLastName.getText());
             String email = String.valueOf(editEmail.getText());
             String address = String.valueOf(editAddress.getText());
 
-            DBHelper dbHelper = new DBHelper(this);
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            // Створюємо об'єкт ContentValues, де імена стовпців - ключі,
-            // а інформация про акаунт - значення
-            ContentValues values = new ContentValues();
-            if (!firstName.isEmpty()){
-                values.put(Contract.GuestEntry.COLUMN_FIRST_NAME, firstName);
-            }
-            if(!lastName.isEmpty()){
-                values.put(Contract.GuestEntry.COLUMN_LAST_NAME, lastName);
-            }
-            if(!email.isEmpty()){
-                values.put(Contract.GuestEntry.COLUMN_EMAIL, email);
-            }
-            if(!address.isEmpty()){
-                values.put(Contract.GuestEntry.COLUMN_ADDRESS, address);
-            }
+            if(checkName(firstName, "first name") && checkName(lastName, "last name")){
+                DBHelper dbHelper = new DBHelper(this);
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                // Створюємо об'єкт ContentValues, де імена стовпців - ключі,
+                // а інформация про акаунт - значення
+                ContentValues values = new ContentValues();
+                if (!firstName.isEmpty()){
+                    values.put(Contract.GuestEntry.COLUMN_FIRST_NAME, firstName);
+                }
+                if(!lastName.isEmpty()){
+                    values.put(Contract.GuestEntry.COLUMN_LAST_NAME, lastName);
+                }
+                if(!email.isEmpty()){
+                    values.put(Contract.GuestEntry.COLUMN_EMAIL, email);
+                }
+                if(!address.isEmpty()){
+                    values.put(Contract.GuestEntry.COLUMN_ADDRESS, address);
+                }
+                if(convertedImage!=null){
+                    values.put(Contract.GuestEntry.COLUMN_IMAGE, convertedImage);
+                }
 
-            long newRowId = db.update(Contract.GuestEntry.TABLE_NAME, values, "_id = ?",  new String[] {id_s});
-            if (newRowId == -1) {
-                // Если ID  -1, значит произошла ошибка
-                Toast.makeText(this, "Помилка при оновленні акаунту", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Акаунт оновлено успішно", Toast.LENGTH_SHORT).show();
+                if(values.size() != 0){
+                    long newRowId = db.update(Contract.GuestEntry.TABLE_NAME, values, "_id = ?",  new String[] {id_s});
+                    if (newRowId == -1) {
+                        // Якщо ID  -1, це помилка
+                        Toast.makeText(this, "Error updating account", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Account updated successfully", Toast.LENGTH_SHORT).show();
+                    }
+                    convertedImage = null;
+                    db.close();
+                    finish();
+                }
+                else {
+                    Toast.makeText(this, "Error: empty data for updating", Toast.LENGTH_SHORT).show();
+                }
             }
-            db.close();
-            finish();
         }
         else{
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-            builder1.setMessage("Error: ID is empty");
-            builder1.setCancelable(true);
-
-            builder1.setPositiveButton(
-                    "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
+            Toast.makeText(this, "Error: ID is empty", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public boolean checkName(String name, String field){
+        for (Character c: name.toCharArray()) {
+            if(Character.isDigit(c)){
+                Toast.makeText(this, "Error: " + field + " contains digits", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        return true;
     }
 }

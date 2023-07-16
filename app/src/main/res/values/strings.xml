@@ -17,6 +17,9 @@
     <string name="btnDelete">Delete</string>
     <string name="btnConfirm">Confirm</string>
     <string name="deleteLabel">Enter ID of account you want to delete</string>
+    <string name="updateLabel">Enter the account ID and fill in only those fields that you want to update</string>
+    <string name="readLabel">Enter ID of account you want to read</string>
+    <string name="addLabel">Photo is optional field</string>
     <string name="dbInfo">Database information</string>
     <string name="btnSort">Sort</string>
     <string name="orderlabel">ORDER BY</string>
@@ -25,4 +28,5 @@
     <string name="radioEmail">Email</string>
     <string name="btnLoad">Load photo</string>
     <string name="btnReadOne">Read One</string>
+    <string name="onClear">Table was cleared</string>
 </resources>
